@@ -8,7 +8,7 @@ import (
 )
 
 type ServerConfig struct {
-	Name string `yaml:"name"`
+	Name   string               `yaml:"name"`
 	Logger logutil.LoggerConfig `yaml:"loggerConfig"`
 }
 
@@ -19,12 +19,12 @@ type serverConfigWrapper struct {
 func (c *ServerConfig) Load(filename string) error {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return errors.Wrap(err, "failed to read " + filename)
+		return errors.Wrap(err, "failed to read "+filename)
 	}
-	t := serverConfigWrapper{ Server: c }
+	t := serverConfigWrapper{Server: c}
 
 	if err := yaml.Unmarshal(data, &t); err != nil {
-		return errors.Wrap(err, "failed to parse " + filename)
+		return errors.Wrap(err, "failed to parse "+filename)
 	}
 	return nil
 }

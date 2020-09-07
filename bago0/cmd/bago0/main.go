@@ -11,7 +11,7 @@ import (
 )
 
 type Config struct {
-	server bago0.ServerConfig
+	server     bago0.ServerConfig
 	configFile string
 }
 
@@ -20,7 +20,7 @@ func (c *Config) Setup() error {
 	flag.Parse()
 
 	if err := c.server.Load(c.configFile); err != nil {
-		return errors.Wrap(err, "failed to load configFile " + c.configFile)
+		return errors.Wrap(err, "failed to load configFile "+c.configFile)
 	}
 	return nil
 }

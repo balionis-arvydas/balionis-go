@@ -13,14 +13,14 @@ type LogType string
 const (
 	FileLogger = "file"
 	DebugLevel = "debug"
-	InfoLevel = "info"
-	WarnLevel = "warn"
+	InfoLevel  = "info"
+	WarnLevel  = "warn"
 	ErrorLevel = "error"
 )
 
 type LoggerConfig struct {
-	LogType LogType `yaml:"logType"`
-	LogLevel string `yaml:"logLevel"`
+	LogType    LogType           `yaml:"logType"`
+	LogLevel   string            `yaml:"logLevel"`
 	Properties map[string]string `yaml:"properties,omitempty"`
 }
 
@@ -35,7 +35,7 @@ func newLoggerWriter(c LoggerConfig) (log.Logger, error) {
 		}
 		f, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
-			return nil, errors.Wrap(err, "cannot open file " + fn)
+			return nil, errors.Wrap(err, "cannot open file "+fn)
 		}
 		writer = log.NewSyncWriter(f)
 	default:
