@@ -1,3 +1,7 @@
 server:
   name: MyName
-  timeout: 60000
+  loggerConfig:
+    logType: file
+    logLevel: debug
+    properties:
+      file: bago0.log

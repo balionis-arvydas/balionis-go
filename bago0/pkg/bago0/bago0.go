@@ -1,13 +1,15 @@
 package bago0
 
 import (
+	"github.com/balionis-arvydas/balionis-go/bago0/pkg/logutil"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
 
 type ServerConfig struct {
 	Name string `yaml:"name"`
-	Timeout int `yaml:"timeout"`
+	Logger logutil.LoggerConfig `yaml:"loggerConfig"`
 }
 
 type serverConfigWrapper struct {
@@ -17,12 +19,12 @@ type serverConfigWrapper struct {
 func (c *ServerConfig) Load(filename string) error {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to read " + filename)
 	}
-	t := serverConfigWrapper{ Server: c}
+	t := serverConfigWrapper{ Server: c }
 
 	if err := yaml.Unmarshal(data, &t); err != nil {
-		return err
+		return errors.Wrap(err, "failed to parse " + filename)
 	}
 	return nil
 }

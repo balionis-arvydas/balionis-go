@@ -4,21 +4,25 @@ import (
 	"flag"
 	"fmt"
 	"github.com/balionis-arvydas/balionis-go/bago0/pkg/bago0"
+	"github.com/balionis-arvydas/balionis-go/bago0/pkg/logutil"
+	"github.com/go-kit/kit/log/level"
+	"github.com/pkg/errors"
 	"os"
 )
 
 type Config struct {
 	server bago0.ServerConfig
-	printConfig  bool
-	configFile   string
+	configFile string
 }
 
 func (c *Config) Setup() error {
-	flag.BoolVar(&c.printConfig, "print.config", false, "Print the entire config")
-	flag.StringVar(&c.configFile, "config.file", "default.yaml", "yaml file to load")
+	flag.StringVar(&c.configFile, "configFile", "default.yaml", "yaml file to load")
 	flag.Parse()
 
-	return c.server.Load(c.configFile)
+	if err := c.server.Load(c.configFile); err != nil {
+		return errors.Wrap(err, "failed to load configFile " + c.configFile)
+	}
+	return nil
 }
 
 func main() {
@@ -28,9 +32,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	if config.printConfig {
-		fmt.Fprintf(os.Stdout, "DEBUG: config: %v\n", config)
+	logger, err := logutil.NewLogger(config.server.Logger)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: failed to create logger: %v\n", err)
+		os.Exit(1)
 	}
 
-	fmt.Println("DEBUG: done")
+	level.Info(logger).Log("config", fmt.Sprintf("%+v", config))
+
+	level.Info(logger).Log("done", "+")
 }
