@@ -6,12 +6,17 @@ import (
 	"github.com/pkg/errors"
 	"io"
 	"os"
+	"time"
 )
 
 type LogType string
 
 const (
-	FileLogger = "file"
+	FileLogger    = "file"
+	ConsoleLogger = "console"
+)
+
+const (
 	DebugLevel = "debug"
 	InfoLevel  = "info"
 	WarnLevel  = "warn"
@@ -24,6 +29,15 @@ type LoggerConfig struct {
 	Properties map[string]string `yaml:"properties,omitempty"`
 }
 
+var osStdout io.Writer = os.Stdout
+
+var osOpenFile = func (name string, flag int, perm os.FileMode) (io.Writer, error) {
+	f, err := os.OpenFile(name, flag, perm)
+	return f, err
+}
+
+var fnLogTime = func() time.Time { return time.Now().UTC() }
+
 func newLoggerWriter(c LoggerConfig) (log.Logger, error) {
 
 	var writer io.Writer
@@ -33,17 +47,21 @@ func newLoggerWriter(c LoggerConfig) (log.Logger, error) {
 		if !found {
 			fn = os.Args[0] + ".log"
 		}
-		f, err := os.OpenFile(fn, os.O_RDWR|os.O_CREATE, 0755)
+		f, err := osOpenFile(fn, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
 			return nil, errors.Wrap(err, "cannot open file "+fn)
 		}
 		writer = log.NewSyncWriter(f)
 	default:
-		writer = os.Stdout
+		writer = osStdout
 	}
 
 	logger := log.NewJSONLogger(writer)
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+	logger = log.With(logger, "ts",
+		log.TimestampFormat(
+			fnLogTime,
+			time.RFC3339,
+		))
 	return logger, nil
 }
 

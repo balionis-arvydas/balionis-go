@@ -16,8 +16,10 @@ type serverConfigWrapper struct {
 	Server *ServerConfig `yaml:"server"`
 }
 
+var ioutilReadFile = ioutil.ReadFile
+
 func (c *ServerConfig) Load(filename string) error {
-	data, err := ioutil.ReadFile(filename)
+	data, err := ioutilReadFile(filename)
 	if err != nil {
 		return errors.Wrap(err, "failed to read "+filename)
 	}
