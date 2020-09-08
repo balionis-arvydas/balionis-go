@@ -1,5 +1,8 @@
 server:
   name: MyName
+  # loggerConfig:
+  #  logType: console
+  #  logLevel: debug
   loggerConfig:
     logType: file
     logLevel: debug
