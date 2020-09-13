@@ -28,7 +28,9 @@ $ /c/bin/go-1.14.7/bin/build-lambda-zip -output bago1.zip bago1
 $ go test ./...
 ```
 
-# Deploy
+# Deploy 
+
+## Deploy Lambda
 
 ```
 $ aws iam create-role --role-name my-go-role --assume-role-policy-document file://config/trust-policy.json
@@ -89,3 +91,98 @@ $ aws lambda invoke --function-name my-go-fu raw-in-base64-out \
 {"message":"Hello Go!"}
 ```
 
+## Deploy REST API
+
+```
+$ aws apigateway create-rest-api --name 'my-go-api' --region eu-west-2
+{
+    "id": "wtdsc5dqmb",
+    "name": "my-go-api",
+    "createdDate": "2020-09-13T16:33:40+02:00",
+    "apiKeySource": "HEADER",
+    "endpointConfiguration": {
+        "types": [
+            "EDGE"
+        ]
+    }
+}
+
+$ aws apigateway get-resources --rest-api-id wtdsc5dqmb --region eu-west-2
+{
+    "items": [
+        {
+            "id": "w1jithsuak",
+            "path": "/"
+        }
+    ]
+}
+
+$ aws apigateway create-resource --rest-api-id wtdsc5dqmb \
+      --region eu-west-2 \
+      --parent-id w1jithsuak \
+      --path-part echo
+{
+    "id": "tj92fj",
+    "parentId": "w1jithsuak",
+    "pathPart": "echo",
+    "path": "/echo"
+}
+
+$ aws apigateway put-method --rest-api-id wtdsc5dqmb \
+         --resource-id tj92fj \
+         --http-method POST \
+         --authorization-type "NONE" \
+         --region eu-west-2
+{
+    "httpMethod": "POST",
+    "authorizationType": "NONE",
+    "apiKeyRequired": false
+}
+
+$ aws apigateway put-integration --rest-api-id wtdsc5dqmb \
+        --resource-id tj92fj \
+        --http-method POST \
+        --integration-http-method POST \
+        --type AWS \
+        --uri arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:613877803204:function:my-go-function/invocations \
+        --region eu-west-2
+{
+    "type": "AWS_PROXY",
+    "httpMethod": "POST",
+    "uri": "arn:aws:apigateway:eu-west-2:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-2:613877803204:function:my-go-function/invocations",
+    "passthroughBehavior": "WHEN_NO_MATCH",
+    "timeoutInMillis": 29000,
+    "cacheNamespace": "tj92fj",
+    "cacheKeyParameters": []
+}
+
+$ aws apigateway put-method-response --rest-api-id wtdsc5dqmb \
+       --resource-id tj92fj --http-method POST \
+       --status-code 200  --region eu-west-2 \
+       --response-model '{"application/json": "Empty"}'
+{
+    "statusCode": "200",
+    "responseModels": {
+        "application/json": "Empty"
+    }
+}
+
+$ aws apigateway put-integration-response --rest-api-id wtdsc5dqmb \
+        --resource-id tj92fj --http-method POST \
+        --status-code 200 --response-templates '{"application/json": "" }'
+{
+    "statusCode": "200",
+    "responseTemplates": {
+        "application/json": null
+    }
+}
+
+$ aws apigateway create-deployment --rest-api-id wtdsc5dqmb --stage-name test
+{
+    "id": "k57ewc",
+    "createdDate": "2020-09-13T19:09:54+02:00"
+}
+
+// https://{restapi_id}.execute-api.{region}.amazonaws.com/{stage_name}/{method_name}
+$ curl -s -X POST -d '{"name": "Go"}' https://wtdsc5dqmb.execute-api.eu-west-2.amazonaws.com/test/echo
+```
