@@ -82,7 +82,7 @@ $ aws lambda create-function --function-name my-go-function \
     "LastUpdateStatus": "Successful"
 }
 
-$ aws lambda invoke --function-name my-go-fu raw-in-base64-out \
+$ aws lambda invoke --function-name my-go-function --cli-binary-format raw-in-base64-out \
       --payload '{ "name": "Go" }' bago1.json ; cat bago1.json
 {
     "StatusCode": 200,
