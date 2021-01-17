@@ -1,0 +1,7 @@
+{
+  "iss": "MyClientID",
+  "sub": "MyCleintID",
+  "exp": "token_expire",
+  "jit": "token_uuid",
+  "aud": "http://localhost:8080/iam/token.oauth2"
+}

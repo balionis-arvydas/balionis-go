@@ -1,0 +1,7 @@
+{
+  "iss": "MyClientID",
+  "sub": "MyCleintID",
+  "exp": "1610747945",
+  "jit": "ac766fb7-436c-41d6-93b0-39e08496d23d",
+  "aud": "http://localhost:8080/iam/token.oauth2"
+}
